@@ -1,1 +1,417 @@
-<?php session_start();error_reporting(0);ini_set('display_errors',0);if(!isset($_SESSION['user_id'])){header("Location: /index.php");exit();}$db_config=['host'=>'localhost','user'=>'gold24_user','pass'=>'random_password','name'=>'gold24_db'];try{$conn=new mysqli($db_config['host'],$db_config['user'],$db_config['pass'],$db_config['name']);$conn->set_charset("utf8mb4");$username=$_SESSION['user_name']??null;$user_id=$_SESSION['user_uid']??'all';$user_uid=$_SESSION['user_uid']??null;$lessons=range(1,12);$locked_lessons=array_fill(1,12,true);if(!empty($user_id)&&$user_id!='all'){$stmt=$conn->prepare("SELECT lesson_id,is_locked FROM lesson_locks WHERE user_id=?");$stmt->bind_param("s",$user_id);$stmt->execute();$result=$stmt->get_result();while($row=$result->fetch_assoc()){$lesson_id=$row['lesson_id'];$is_locked=$row['is_locked'];if(isset($locked_lessons[$lesson_id])){$locked_lessons[$lesson_id]=$is_locked==1;}}foreach($lessons as$lesson){if($lesson<=5){$locked_lessons[$lesson]=false;}}}else{foreach($lessons as$lesson){$locked_lessons[$lesson]=($lesson>5);}}}catch(Exception$e){error_log($e->getMessage());}?><!DOCTYPE html><html lang="fa" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><meta name="description" content="بهترین پلتفرم آموزش زبان انگلیسی - یادگیری تضمینی با متد نوین"><meta name="keywords" content="آموزش زبان انگلیسی,دوره زبان آنلاین,یادگیری انگلیسی,کلاس مکالمه"><title>آموزش تضمینی زبان انگلیسی | English.Online24</title><style>@font-face{font-family:'IRANSans';src:url('fonts/IRANSansWeb.woff2')format('woff2')}@font-face{font-family:'Yekan';src:url('fonts/Yekan.woff2')format('woff2')}@font-face{font-family:'Vazir';src:url('fonts/Vazir.woff2')format('woff2')}body{background:#1C1C1C;font-family:'IRANSans',sans-serif;display:flex;justify-content:center;flex-direction:column;align-items:center;padding:20px;margin:0;min-height:100vh;color:#FFF}.persian-title{font-family:'IRANSans';font-weight:bold;color:#FFD700;text-shadow:2px 2px 4px rgba(0,0,0,0.3)}.badges{display:flex;gap:15px;justify-content:center;margin:20px 0}.badge{background:rgba(139,0,0,0.1);padding:10px 20px;border-radius:8px;border:1px solid rgba(139,0,0,0.2);font-family:'Yekan'}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin:20px 0;font-family:'Vazir'}.stat-item{background:linear-gradient(145deg,#2B1B17,#1a110f);padding:15px;border-radius:10px;text-align:center}.stat-number{font-size:24px;color:#FFD700;font-weight:bold}.header{background:rgba(139,0,0,0.15);color:#fff;padding:15px;font-size:1.4rem;font-weight:bold;text-align:center;border-radius:12px;width:80%;max-width:1000px;margin-bottom:20px;box-shadow:0 4px 20px rgba(139,0,0,0.2);backdrop-filter:blur(12px);border:2px solid rgba(139,0,0,0.3)}.container{display:flex;justify-content:space-between;width:90%;max-width:1200px;align-items:flex-start}.dashboard{width:22%;background:#2B1B17;padding:15px;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.2);text-align:center;transition:0.3s}.dashboard h3{color:#8B0000;margin-bottom:15px;font-size:1.2rem}.lesson-container{width:75%;display:grid;grid-template-columns:repeat(2,1fr);gap:20px}.lesson-card{background:#2B1B17;border-radius:12px;padding:20px;box-shadow:0 6px 15px rgba(0,0,0,0.2);backdrop-filter:blur(12px);border:2px solid rgba(101,67,33,0.3);text-align:center;transition:0.3s;position:relative}.special-tag{background:linear-gradient(45deg,#FFD700,#FFA500);color:#000;padding:3px 10px;border-radius:15px;font-size:12px;font-family:'IRANSans';display:inline-block;margin:5px}.progress-bar{background:rgba(139,0,0,0.1);height:10px;border-radius:5px;margin:10px 0;position:relative;overflow:hidden}.progress-fill{background:linear-gradient(90deg,#8B0000,#FF6347);height:100%;border-radius:5px;transition:width 0.3s ease}.info-box{background:rgba(139,0,0,0.05);border-right:4px solid #8B0000;padding:15px;margin:15px 0;font-family:'Vazir';border-radius:4px}.button-container{display:flex;flex-direction:column;align-items:center;gap:10px}.button-glass{border:none;padding:12px 20px;font-size:16px;font-weight:bold;border-radius:8px;backdrop-filter:blur(8px);transition:0.3s ease-in-out;cursor:pointer;text-decoration:none;width:90%;margin-bottom:15px;min-width:120px;font-family:'IRANSans'}.button-glass.green{background:#654321;border:2px solid rgba(101,67,33,0.5);color:#FFF}.button-glass.red{background:#8B0000;border:2px solid rgba(139,0,0,0.5);color:#FFF}.button-glass.green:hover{background:#8B0000;border-color:rgba(139,0,0,0.5)}.button-glass.red:hover{background:#FF6347;border-color:rgba(255,99,71,0.5)}.footer{background:rgba(139,0,0,0.15);color:#fff;text-align:center;padding:12px;width:80%;max-width:1000px;margin-top:30px;border-radius:8px;font-size:14px;box-shadow:0 4px 20px rgba(139,0,0,0.2);backdrop-filter:blur(12px);border:2px solid rgba(139,0,0,0.3);font-family:'Vazir'}.footer a{color:#FF6347;text-decoration:none}.footer a:hover{text-decoration:underline}.locked-lesson{position:relative;opacity:0.8}.locked-lesson::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.1);border-radius:12px}@media(max-width:768px){.container{flex-direction:column;align-items:center}.dashboard{width:100%;margin-bottom:20px}.lesson-container{width:100%;grid-template-columns:1fr}.header,.footer{width:90%}.button-glass{padding:15px 20px;font-size:15px}.stats{grid-template-columns:repeat(2,1fr)}.badges{flex-direction:column}}</style></head><body><div class="header"><h1 class="persian-title">پلتفرم آموزش زبان انگلیسی</h1><div class="badges"><div class="badge">دارای مجوز رسمی</div><div class="badge">همکاری با ۱۰+ آکادمی معتبر</div><div class="badge">پشتیبانی ۲۴/۷</div></div></div><div class="stats"><div class="stat-item"><div class="stat-number">۱۰۰۰+</div><div>دانشجوی فعال</div></div><div class="stat-item"><div class="stat-number">۵۰+</div><div>دوره تخصصی</div></div><div class="stat-item"><div class="stat-number">۲۰+</div><div>استاد مجرب</div></div><div class="stat-item"><div class="stat-number">۹۸٪</div><div>رضایت دانشجویان</div></div></div><div class="container"><div class="dashboard"><h3>پنل کاربری</h3><?php if(!empty($user_id)&&$user_id!='all'):?><p style="color:#fff"><strong>نام کاربری:</strong><?php echo htmlspecialchars($username??"");?></p><p style="color:#fff"><strong>کد کاربری:</strong><?php echo htmlspecialchars($user_uid??"");?></p><?php endif;?><button class="button-glass green" onclick="location.href='/English/profile.php'">پروفایل</button><button class="button-glass green" onclick="window.location.href='/English/settings.php'">تنظیمات</button><button class="button-glass red" onclick="location.href='/English/logout.php'">خروج</button></div><div class="lesson-container"><?php foreach($lessons as$lesson):?><div class="lesson-card<?php echo$locked_lessons[$lesson]?' locked-lesson':'';?>"><span class="special-tag">پرطرفدار</span><h3>درس <?php echo$lesson;?><?php echo$locked_lessons[$lesson]?' 🔒 ':'';?></h3><div class="progress-bar"><div class="progress-fill" style="width:60%"></div></div><div class="info-box">این دوره شامل ۱۲ جلسه آموزشی با تدریس اساتید برتر می‌باشد</div><div class="button-container"><?php if($locked_lessons[$lesson]):?><a href="/English/purchase.php?lesson=<?php echo$lesson;?>" class="button-glass red">خرید دوره</a><?php else:?><a href="/English/lesson<?php echo$lesson;?>.html" class="button-glass green">شروع یادگیری</a><a href="#" class="button-glass red">محتوای دوره</a><?php endif;?></div></div><?php endforeach;?></div></div><div class="footer"><p>شیراز، ایران | محسن | ۲۰۲۴</p><p>ما را دنبال کنید: <a href="https://instagram.com/english.online24">@english.online24</a></p></div></body></html>
+<?php session_start(); ini_set('display_errors', 
+0); error_reporting(0); require_once 
+'vendor/autoload.php'; $dotenv = 
+Dotenv\Dotenv::createImmutable(__DIR__); 
+$dotenv->load(); if 
+(!isset($_SESSION['user_id'])) {
+    header("Location:login.php"); exit();
+}
+try { $conn = new mysqli($_ENV['DB_HOST'], 
+    $_ENV['DB_USER'], $_ENV['DB_PASS'], 
+    $_ENV['DB_NAME']); if ($conn->connect_error) 
+    {
+        throw new Exception("خطا در اتصال به 
+        دیتابیس");
+    }
+    $conn->set_charset("utf8mb4"); $user_id = 
+    $_SESSION['user_uid'] ?? 'all'; $username = 
+    $_SESSION['user_name'] ?? null; $lessons = 
+    range(1, 12); $locked_lessons = array_fill(1, 
+    12, true); if (!empty($user_id) && $user_id 
+    != 'all') {
+        $stmt = $conn->prepare("SELECT 
+        lesson_id,is_locked FROM lesson_locks 
+        WHERE user_id=?"); $stmt->bind_param("s", 
+        $user_id); $stmt->execute(); $result = 
+        $stmt->get_result(); while ($row = 
+        $result->fetch_assoc()) {
+            $lesson_id = $row['lesson_id']; if 
+            (isset($locked_lessons[$lesson_id])) 
+            {
+                $locked_lessons[$lesson_id] = 
+                $row['is_locked'] == 1;
+            }
+        }
+    }
+    foreach ($lessons as $lesson) { if ($lesson 
+        <= 5) {
+            $locked_lessons[$lesson] = false;
+        }
+    }
+} catch (Exception $e) {
+    error_log($e->getMessage()); die("خطا در 
+    اتصال به دیتابیس");
+}
+// ویدیوهای دوره
+$course_video_1 = 
+'https://gold24.io/English/c3e4c3145f8a1374bb5511328d8dd7d9.MP4'; 
+$course_video_2 = 
+'https://gold24.io/English/99d975b681b3580821ffe35b3c84c34c.MP4'; 
+$course_video_3 = 
+'https://gold24.io/English/e7942b24f73989fd6e94ed66f13a5245.MP4'; 
+$course_video_4 = 
+'https://gold24.io/English/b78f5bdc712232920a030900a6fc65e2.MP4'; 
+$course_video_5 = 
+'https://gold24.io/English/cb509dd51fb54ae76a5eba0c22eceab4.MP4'; 
+$course_video_6 = 
+'https://gold24.io/English/386d485b6d91d435dad096967bd50b50.MP4'; 
+$course_video_7 = 
+'https://gold24.io/English/49e718c4cd215b584bed8e012006924c.MP4'; 
+$course_video_8 = 
+'https://gold24.io/English/5b7e503f907c2a099dfda791f3267182.MP4'; 
+$course_video_9 = 
+'https://gold24.io/English/4fdeb4bdf50a5e94a8e97a01b4ec172a.MP4'; 
+$course_video_10 = 
+'https://gold24.io/English/21176fb17cb0029baf3930187eed0b4b.MP4'; 
+$course_video_11 = 
+'https://gold24.io/English/8e9bf54acbf767eb63e736d1dd91681f.MP4'; 
+$course_video_12 = 
+'https://gold24.io/English/1e15e59f08db4a9e97e9a0a45f7830f1.MP4'; 
+?> <!DOCTYPE html> <html lang="fa" dir="rtl"> 
+<head>
+    <meta charset="UTF-8"> <meta name="viewport" 
+    content="width=device-width, 
+    initial-scale=1.0"> <title>آموزش زبان انگلیسی 
+    | English.Online24</title>
+    <meta name="description" content="یادگیری 
+    زبان انگلیسی با جدیدترین روش‌ها! دسترسی به 
+    دوره‌های مکالمه، گرامر و آزمون‌های بین‌المللی + 
+    پشتیبانی ۲۴/۷"> <meta name="keywords" 
+    content="آموزش زبان انگلیسی, دوره‌های زبان, 
+    خرید دوره, کریپتو, فروشگاه آنلاین"> <link 
+    rel="canonical" 
+    href="https://www.english.online24"> <link 
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" 
+    rel="stylesheet"> <link rel="stylesheet" 
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"> 
+    <link rel="stylesheet" 
+    href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"> 
+    <link 
+    href="https://unpkg.com/aos@2.3.1/dist/aos.css" 
+    rel="stylesheet"> <link rel="stylesheet" 
+    href="https://unpkg.com/swiper@8/swiper-bundle.min.css"/> 
+    <style>
+        @font-face { font-family: 'IRANSans'; 
+            src: url('fonts/IRANSansWeb.woff2') 
+            format('woff2');
+        }
+        body { background: #1C1C1C; /* پس‌زمینه 
+            سیاه */ font-family: 'IRANSans', 
+            sans-serif; color: #FFF; margin: 0; 
+            padding: 20px;
+        }
+        .header { background: linear-gradient(to 
+            right, #8B0000, #A52A2A); /* هدر 
+            گرادینت قرمز تیره */ padding: 15px; 
+            border-radius: 12px; text-align: 
+            center; color: white;
+        }
+        .container { display: flex; gap: 20px; 
+            padding: 20px;
+        }
+        .dashboard { width: 250px; background: 
+            #2B1B17; /* رنگ تیره برای پنل کاربری 
+            */ padding: 20px; border-radius: 
+            12px; height: fit-content; position: 
+            relative; overflow: hidden;
+        }
+        .dashboard h3 { color: #FFD700; margin: 0 
+            0 15px 0;
+        }
+        .user-info { margin-bottom: 20px; 
+            padding: 10px; background: 
+            rgba(139,0,0,0.1); border-radius: 
+            8px; animation: fadeIn 1s;
+        }
+        .dashboard-buttons { display: flex; 
+            flex-direction: column; gap: 10px;
+        }
+        .dashboard-button { background: #C27C00; 
+            /* رنگ طلایی گرم‌تر */ color: #FFF; 
+            padding: 10px; border-radius: 8px; 
+            text-decoration: none; text-align: 
+            center; transition: 0.3s; animation: 
+            fadeInUp 1s;
+        }
+        .dashboard-button:hover { background: 
+            #FFB81C; /* رنگ طلایی روشن‌تر هنگام 
+            هاور */
+        }
+        .course-container { flex: 1; position: 
+            relative; overflow: hidden;
+        }
+        .course-grid { display: grid; 
+            grid-template-columns: 
+            repeat(auto-fit, minmax(300px, 1fr)); 
+            gap: 20px; animation: fadeIn 1s;
+        }
+        .course-card { background: #2B1B17; /* 
+            پس‌زمینه تیره برای کارت دوره */ 
+            border: 2px solid #FFD700; /* حاشیه 
+            طلایی */ border-radius: 12px; 
+            padding: 20px; text-align: center; 
+            position: relative; overflow: hidden; 
+            transition: transform 0.3s; 
+            box-shadow: 2px 2px 10px rgba(255, 
+            255, 255, 0.1);
+        }
+        .course-card:hover { transform: 
+            translateY(-5px);
+        }
+        .course-card h2 { font-size: 24px; 
+            text-transform: uppercase; color: 
+            #FFD700;
+        }
+        .course-card .course-description { 
+            font-size: 14px; color: #ccc; 
+            margin-top: 10px;
+        }
+        .progress-bar { width: 100%; height: 
+            10px; background-color: #8B0000; /* 
+            رنگ زمینه */ border-radius: 5px; 
+            margin-top: 10px; position: relative; 
+            overflow: hidden;
+        }
+        .progress-bar .progress { height: 100%; 
+            background-color: #FFD700; /* رنگ 
+            طلایی */ border-radius: 5px; width: 
+            0%; transition: width 0.5s 
+            ease-in-out;
+        }
+        .course-card .reviews { margin-top: 20px;
+        }
+                .course-card .reviews .rating { 
+            color: #FFD700; font-size: 18px;
+        }
+        .course-card .reviews .review-text { 
+            font-size: 14px; color: #ccc; 
+            margin-top: 5px;
+        }
+        .course-card .media-container { 
+            margin-top: 20px;
+        }
+        .course-card .media-container video { 
+            width: 100%; border-radius: 8px;
+        }
+        .course-card .media-container img { 
+            width: 100%; border-radius: 8px;
+        }
+        .course-card .share-button { display: 
+            inline-block; background-color: 
+            #8B0000;
+            color: #FFF; padding: 5px 10px; 
+            border-radius: 5px; text-decoration: 
+            none; margin-top: 10px; transition: 
+            background-color 0.3s;
+        }
+        .course-card .share-button:hover { 
+            background-color: #A52A2A;
+        }
+        .vip-course { background-color: #FFD700; 
+            color: #2B1B17; padding: 5px 10px; 
+            border-radius: 5px; font-size: 12px; 
+            margin-left: 10px;
+        }
+        .private-course { background-color: 
+            #8B0000;
+            color: #FFF; padding: 5px 10px; 
+            border-radius: 5px; font-size: 12px; 
+            margin-right: 10px;
+        }
+        .button { background: #C27C00; /* رنگ 
+            طلایی گرم */ color: #333; padding: 
+            10px 20px; border-radius: 8px; 
+            text-decoration: none; display: 
+            inline-block; margin: 10px; 
+            transition: 0.3s;
+        }
+        .button:hover { background: #FFB81C; /* 
+            رنگ طلایی روشن‌تر هنگام هاور */ 
+            transform: translateY(-2px);
+        }
+        @media (max-width: 768px) { .container { 
+                flex-direction: column;
+            }
+            .dashboard { width: auto;
+            }
+        }
+    </style> </head> <body> <div class="header 
+    wow fadeInDown" data-wow-duration="1s">
+        <h1>English.Online24 | پلتفرم تخصصی آموزش 
+        زبان انگلیسی</h1> <h2 
+        class="typed-text"></h2>
+    </div> <div class="container"> <div 
+        class="dashboard wow fadeInLeft" 
+        data-wow-duration="1s" 
+        data-wow-delay="0.5s">
+            <h3>پنل کاربری</h3> <?php 
+            if(!empty($user_id) && $user_id != 
+            'all'): ?> <div class="user-info">
+                <p><strong>نام 
+                کاربری:</strong><?=htmlspecialchars($username??"")?></p> 
+                <p><strong>کد 
+                کاربری:</strong><?=htmlspecialchars($user_id??"")?></p>
+            </div> <?php endif; ?> <div 
+            class="dashboard-buttons">
+                <a href="profile.php" 
+                class="dashboard-button">پروفایل</a> 
+                <a href="settings.php" 
+                class="dashboard-button">تنظیمات</a> 
+                <a href="logout.php" 
+                class="dashboard-button">خروج</a>
+            </div> </div> <div 
+        class="course-container">
+            <div class="course-grid"> <?php 
+                foreach($lessons as $lesson): ?> 
+                <div class="course-card wow 
+                fadeInUp" data-wow-duration="1s" 
+                data-wow-delay="<?=$loop->index*0.2?>s">
+                    <h2> <?php 
+                        if($lesson>=6&&$lesson<=12):?><span 
+                        class="private-course">ویژه/خصوصی</span><?php 
+                        endif;?> درس <?=$lesson?> 
+                        <?php 
+                        if($lesson>=6&&$lesson<=12):?><span 
+                        class="vip-course">VIP</span><?php 
+                        endif;?> 
+                        <?=$locked_lessons[$lesson]?' 
+                        🔒 ':''?>
+                    </h2> <p 
+                    class="course-description">توضیحات 
+                    مختصر درباره محتوای این 
+                    درس</p> <div 
+                    class="progress-bar">
+                        <div 
+                        class="progress"></div>
+                    </div> <div class="reviews"> 
+                        <div class="rating">
+                            <i class="fas 
+                            fa-star"></i><i 
+                            class="fas 
+                            fa-star"></i><i 
+                            class="fas 
+                            fa-star"></i><i 
+                            class="fas 
+                            fa-star"></i><i 
+                            class="fas 
+                            fa-star"></i>
+                        </div> <p 
+                        class="review-text">نظر 
+                        کاربران در مورد این 
+                        درس</p>
+                    </div> <div 
+                    class="media-container">
+                        <?php if($lesson == 1): 
+                        ?> <video controls>
+                            <source 
+                            src="<?=$course_video_1?>" 
+                            type="video/mp4">
+                        </video> <?php 
+                        elseif($lesson == 2): ?> 
+                        <video controls>
+                            <source 
+                            src="<?=$course_video_2?>" 
+                            type="video/mp4">
+                        </video> <?php 
+                        elseif($lesson == 3): ?> 
+                        <video controls>
+                            <source 
+                            src="<?=$course_video_3?>" 
+                            type="video/mp4">
+                        </video> <?php 
+                        elseif($lesson == 4): ?> 
+                        <video controls>
+                            <source 
+                            src="<?=$course_video_4?>" 
+                            type="video/mp4">
+                        </video> <?php 
+                        elseif($lesson == 5): ?> 
+                        <video controls>
+                            <source 
+                            src="<?=$course_video_5?>" 
+                            type="video/mp4">
+                        </video> <?php 
+                        elseif($lesson == 6): ?> 
+                        <video controls>
+                            <source 
+                            src="<?=$course_video_6?>" 
+                            type="video/mp4">
+                        </video> <?php 
+                        elseif($lesson == 7): ?> 
+                        <video controls>
+                            <source 
+                            src="<?=$course_video_7?>" 
+                            type="video/mp4">
+                        </video> <?php 
+                        elseif($lesson == 8): ?> 
+                        <video controls>
+                            <source 
+                            src="<?=$course_video_8?>" 
+                            type="video/mp4">
+                        </video> <?php 
+                        elseif($lesson == 9): ?> 
+                        <video controls>
+                            <source 
+                            src="<?=$course_video_9?>" 
+                            type="video/mp4">
+                        </video> <?php 
+                        elseif($lesson == 10): ?> 
+                        <video controls>
+                            <source 
+                            src="<?=$course_video_10?>" 
+                            type="video/mp4">
+                        </video> <?php 
+                        elseif($lesson == 11): ?> 
+                        <video controls>
+                            <source 
+                            src="<?=$course_video_11?>" 
+                            type="video/mp4">
+                        </video> <?php 
+                        elseif($lesson == 12): ?> 
+                        <video controls>
+                            <source 
+                            src="<?=$course_video_12?>" 
+                            type="video/mp4">
+                        </video> <?php else: ?> 
+                        <img 
+                        src="path/to/your/placeholder/image.jpg" 
+                        alt="Course image"> <?php 
+                        endif; ?>
+                    </div> <a href="#" 
+                    class="share-button"><i 
+                    class="fas 
+                    fa-share-alt"></i>اشتراک‌گذاری</a> 
+                    <?php 
+                    if($locked_lessons[$lesson]): 
+                    ?>
+                        <?php 
+                        if($lesson>=6&&$lesson<=12): 
+                        ?>
+                            <a 
+                            href="purchase.php?lesson=<?=$lesson?>" 
+                            class="button">خرید 
+                            دوره</a>
+                        <?php endif; ?> <?php 
+                    else: ?>
+                        <a 
+                        href="lesson<?=$lesson?>.html" 
+                        class="button">شروع 
+                        یادگیری</a>
+                    <?php endif; ?> </div> <?php 
+                endforeach; ?>
+            </div> </div> </div> <footer 
+    style="text-align:center;margin-top:20px;">
+        <div class="contact" style="margin:20px 
+        0;font-size:1.1em;">پشتیبانی تلگرام:<a 
+        href="https://t.me/rosegold181" 
+        style="color:#0088cc;text-decoration:none">@rosegold181</a></div> 
+        <p>©<?=date('Y')?> English.Online24</p>
+    </footer> <script> new WOW().init(); var 
+        typed = new Typed('.typed-text', {
+            strings: ["یادگیری تضمینی با متد 
+            نوین"], typeSpeed: 100, loop: true, 
+            backSpeed: 50
+        });
+    </script> <script 
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body> </html>
