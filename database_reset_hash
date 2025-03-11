@@ -1,0 +1,11 @@
+-- پاک کردن کل جدول خریدها
+TRUNCATE TABLE purchases;
+
+-- ریست کردن تمام قفل‌ها
+UPDATE lesson_locks SET is_locked = 1;
+
+-- پاک کردن لاگ تراکنش‌ها
+TRUNCATE TABLE transaction_logs;
+
+-- ریست کردن auto increment
+ALTER TABLE purchases AUTO_INCREMENT = 1;
